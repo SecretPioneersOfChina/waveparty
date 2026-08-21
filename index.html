@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>WaveParty</title>
+    <link rel="stylesheet" href="css/main.css?v=20260628b">
+    <link rel="stylesheet" href="css/piano-roll.css">
+    <link rel="stylesheet" href="css/bezier-editor.css">
+    <link rel="stylesheet" href="css/mixer.css">
+    <link rel="stylesheet" href="css/tuning-panel.css">
+</head>
+<body>
+<!-- ===== TOP TOOLBAR ===== -->
+<header class="toolbar" id="toolbar">
+    <div class="toolbar-left">
+        <div class="logo">🌊 WaveParty</div>
+        <div class="toolbar-btn" id="btn-project" title="项目">项目</div>
+        <div class="toolbar-btn" id="btn-edit" title="编辑">编辑</div>
+    </div>
+    <div class="toolbar-center">
+        <button class="transport-btn" id="btn-rewind" title="回到开头">⏮</button>
+        <button class="transport-btn" id="btn-back" title="后退">⏪</button>
+        <button class="transport-btn primary" id="btn-play" title="播放/暂停">▶</button>
+        <button class="transport-btn" id="btn-forward" title="前进">⏩</button>
+        <button class="transport-btn" id="btn-stop" title="停止">⏹</button>
+        <button class="transport-btn record-btn" id="btn-record" title="录制">⏺</button>
+        <div class="tempo-group">
+            <span class="tempo-label">Tempo</span>
+            <input type="number" class="tempo-input" id="tempo-input" value="120" min="20" max="300">
+            <span class="tempo-unit">BPM</span>
+        </div>
+        <div class="time-sig-group">
+            <select class="time-sig-sel" id="ts-num">
+                <option>4</option><option>3</option><option>6</option>
+            </select>
+            <span>/</span>
+            <select class="time-sig-sel" id="ts-den">
+                <option>4</option><option>8</option>
+            </select>
+        </div>
+    </div>
+    <div class="toolbar-right">
+        <div class="master-vol-group">
+            <span class="icon">🔊</span>
+            <input type="range" id="master-vol" min="0" max="100" value="80" class="master-vol-slider">
+        </div>
+        <!-- btn-bezier-editor 已由语谱图音色设计器取代，保留隐藏以防旧代码引用 -->
+        <button class="icon-btn" id="btn-bezier-editor" title="音色设计器（已迁移）" style="display:none;">🎨 音色设计</button>
+        <button class="icon-btn" id="btn-mixer" title="打开混音器">🎛 混音器</button>
+        <button class="icon-btn" id="btn-toggle-scale-kb" title="调式钢琴键盘">🎹 调式键盘</button>
+        <button class="icon-btn" id="btn-spectrogram" title="语谱图音色设计器">🎨 音色设计</button>
+        <button class="icon-btn" id="btn-wave-designer" title="Serum 风格波形设计器">🔬 波形设计</button>
+        <button class="icon-btn" id="btn-import-audio" title="导入音频作为音色">🎵 导入音频</button>
+        <button class="icon-btn" id="btn-sample-library" title="个人音效库">🎵 音效库</button>
+        <button class="icon-btn" id="btn-export-wav" title="导出为WAV音频文件">💾 导出WAV</button>
+    </div>
+</header>
+
+<!-- ===== MAIN AREA ===== -->
+<div class="main-layout" id="main-layout">
+
+    <!-- LEFT: Track headers -->
+    <div class="track-headers" id="track-headers">
+        <div class="track-headers-top">
+            <button class="add-track-btn" id="btn-add-track">+ 添加轨道</button>
+            <script>
+            // 立即绑定添加轨道按钮，不依赖任何 JS 模块加载顺序
+            (function() {
+                function bindAddTrack() {
+                    var btn = document.getElementById('btn-add-track');
+                    if (!btn) { setTimeout(bindAddTrack, 100); return; }
+                    // 用 cloneNode 移除所有旧事件
+                    var newBtn = btn.cloneNode(true);
+                    btn.parentNode.replaceChild(newBtn, btn);
+                    newBtn.onclick = function() {
+                        console.log('[Inline] 添加轨道按钮被点击');
+                        if (window.Tracks && window.Tracks.addDefaultTrack) {
+                            window.Tracks.addDefaultTrack();
+                        } else {
+                            console.error('[Inline] Tracks 模块未加载', window.Tracks);
+                            // 降级：直接调用 Tracks.addTrack
+                            if (window.Tracks && window.Tracks.addTrack) {
+                                var insts = [
+                                    { id:'acoustic_guitar', name:'Acoustic Guitar', icon:'🎸', waveform:'sawtooth' },
+                                    { id:'electric_bass', name:'Electric Bass', icon:'🎵', waveform:'triangle' }
+                                ];
+                                var idx = window.Tracks.getAllTracks().length % insts.length;
+                                window.Tracks.addTrack('轨道 ' + (window.Tracks.getAllTracks().length + 1), insts[idx]);
+                            }
+                        }
+                    };
+                    console.log('[Inline] 添加轨道按钮绑定成功');
+                }
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', bindAddTrack);
+                } else {
+                    bindAddTrack();
+                }
+            })();
+            </script>
+        </div>
+        <div class="track-header-list" id="track-header-list">
+            <!-- track headers injected by JS -->
+        </div>
+    </div>
+
+    <!-- CENTER: Arrangement + Piano Roll -->
+    <div class="center-area" id="center-area">
+        <!-- Arrangement View -->
+        <div class="arrangement-view" id="arrangement-view">
+            <div class="ruler" id="ruler"></div>
+            <div class="tracks-container" id="tracks-container">
+                <!-- track lanes injected by JS -->
+            </div>
+        </div>
+        <!-- Piano Roll (hidden by default) -->
+        <div class="piano-roll-panel" id="piano-roll-panel" style="display:none;">
+            <div class="piano-roll-header">
+                <span class="pr-title" id="pr-title">钢琴卷帘</span>
+                <button class="pr-close-btn" id="btn-close-pr">✕ 关闭</button>
+                <div class="pr-tools">
+                    <button class="pr-tool-btn active" data-tool="draw" title="绘制">✏️</button>
+                    <button class="pr-tool-btn" data-tool="select" title="选择">🖱️</button>
+                    <button class="pr-tool-btn" data-tool="erase" title="橡皮">🗑️</button>
+					<button class="pr-tool-btn" id="btn-delete-notes" title="删除选中音符 (Delete键)">🗑 </button>
+                    <button class="pr-tool-btn" id="btn-range-select" title="框选模式（平板：开启后拖动即可框选）">🔲 </button>
+                    <button class="pr-tool-btn" id="btn-repeat-notes" title="重复选中音符 (Ctrl+D)">🔁 </button>
+                    <!--<button class="pr-tool-btn" id="btn-delete-unselected" title="删除未选中音符">🗑 </button> -->
+                    <button class="pr-tool-btn" id="btn-clear-all" title="清空全部音符">📴 </button>
+                    <!-- 左右滚动按钮 -->
+                    <button class="pr-scroll-btn" id="btn-pr-scroll-left" title="向左滚动">◀</button>
+                    <button class="pr-scroll-btn" id="btn-pr-scroll-right" title="向右滚动">▶</button>
+                    <!-- 音高调整区 -->
+                    <span class="pr-pitch-label">🎹音高</span>
+                    <button class="pr-pitch-btn" id="btn-pitch-oct-down" title="降低八度 (Shift+↓)">⬇8va</button>
+                    <button class="pr-pitch-btn" id="btn-pitch-down" title="降低半音 (↓)">♭</button>
+                    <span class="pr-pitch-display" id="pr-pitch-display"></span>
+                    <button class="pr-pitch-btn" id="btn-pitch-up" title="升高半音 (↑)">♯</button>
+                    <button class="pr-pitch-btn" id="btn-pitch-oct-up" title="升高八度 (Shift+↑)">⬆8va</button>
+                    <!-- 持续时间调整区 -->
+                    <span class="pr-duration-label">⏲️时长️</span>
+                    <span class="pr-duration-display" id="pr-duration-display"></span>
+                    <button class="pr-duration-btn" id="btn-duration-half" title="减半 (Alt+←)">½</button>
+                    <button class="pr-duration-btn" id="btn-duration-double" title="加倍 (Alt+→)">×2</button>
+                    <span class="pr-zoom-label">🎚️缩放️</span>
+                    <input type="range" id="pr-zoom" min="0.5" max="4" step="0.1" value="1" class="pr-zoom-slider">
+                    <button class="pr-fit-btn" id="btn-pr-fit" title="适配到音符范围">🔍 适配</button>
+                </div>
+                <div class="pr-quantize-group">
+                    量化:
+                    <select id="pr-quantize">
+                        <option value="1">1</option>
+                        <option value="2">1/2</option>
+                        <option value="4" selected>1/4</option>
+                        <option value="8">1/8</option>
+                        <option value="16">1/16</option>
+                    </select>
+                </div>
+            </div>
+            <div class="piano-roll-body" id="piano-roll-body">
+                <canvas class="piano-keys-canvas" id="piano-keys-canvas" width="60" height="1200"></canvas>
+                <div class="pr-scroll-area" id="pr-scroll-area">
+                    <canvas class="pr-grid-canvas" id="pr-grid-canvas"></canvas>
+                </div>
+                <!-- 浮动左右滚动按钮 -->
+                <button class="pr-float-scroll-btn pr-float-left" id="btn-pr-float-scroll-left" title="向左滚动">◀</button>
+                <button class="pr-float-scroll-btn pr-float-right" id="btn-pr-float-scroll-right" title="向右滚动">▶</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT: Instrument panel / bezier editor -->
+    <div class="right-panel" id="right-panel">
+        <div class="panel-tabs">
+            <button class="panel-tab active" data-panel="instruments">乐器</button>
+            <button class="panel-tab" data-panel="properties">属性</button>
+        </div>
+        <div class="panel-content" id="panel-instruments">
+            <div class="instrument-list" id="instrument-preset-list">
+                <!-- presets -->
+            </div>
+        </div>
+        <div class="panel-content" id="panel-properties" style="display:none;">
+            <div class="prop-section">
+                <div class="prop-label">选中轨道</div>
+                <div id="sel-track-name" class="prop-value">— 无 —</div>
+            </div>
+            <div class="prop-section">
+                <div class="prop-label">音量</div>
+                <input type="range" id="prop-volume" min="0" max="100" value="75" class="prop-slider">
+            </div>
+            <div class="prop-section">
+                <div class="prop-label">声像</div>
+                <input type="range" id="prop-pan" min="-100" max="100" value="0" class="prop-slider">
+            </div>
+            <div class="prop-section">
+                <div class="prop-label">长度</div>
+                <input type="range" id="prop-length" min="1" max="64" value="8" class="prop-slider">
+                <span id="prop-length-display" class="prop-value">8 拍</span>
+            </div>
+            <div class="prop-section">
+                <div class="prop-label">音色模式</div>
+                <span id="prop-timbre-mode" class="prop-value" style="font-weight:600;">🎛 贝塞尔</span>
+            </div>
+
+            <!-- Clip 音量渐变编辑器 -->
+            <div class="prop-section" id="clip-vol-env-section" style="display:none;">
+                <div class="prop-label">
+                    🎚️ Clip 音量渐变
+                    <span id="clip-vol-env-name" style="font-weight:normal;color:var(--text-muted);margin-left:6px;"></span>
+                </div>
+                <canvas id="clip-vol-env-canvas" class="vol-env-canvas" width="360" height="100"></canvas>
+                <div class="vol-env-presets">
+                    <button class="ve-preset-btn active" data-preset="none">—</button>
+                    <button class="ve-preset-btn" data-preset="fadein">淡入 ↗</button>
+                    <button class="ve-preset-btn" data-preset="fadeout">淡出 ↘</button>
+                    <button class="ve-preset-btn" data-preset="fadeboth">淡入淡出</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== BEZIER EDITOR MODAL ===== -->
+<div class="modal-overlay" id="bezier-modal" style="display:none;">
+    <div class="modal-box bezier-modal-box">
+        <div class="modal-header">
+            <h2>🎨 音色 & 包络设计器</h2>
+            <button class="modal-close" id="bezier-modal-close">✕</button>
+        </div>
+        <div class="bezier-editor-layout">
+            <!-- Left: curve type selector -->
+            <div class="bezier-sidebar">
+                <div class="curve-type-label">曲线类型</div>
+                <div class="curve-types">
+                    <button class="curve-type-btn active" data-curve="timbre">音色频谱</button>
+                    <button class="curve-type-btn" data-curve="attack">起音 (Attack)</button>
+                    <button class="curve-type-btn" data-curve="decay">衰减 (Decay)</button>
+                    <button class="curve-type-btn" data-curve="sustain">延音 (Sustain)</button>
+                    <button class="curve-type-btn" data-curve="release">释音 (Release)</button>
+                </div>
+                <div class="curve-presets-label">快速预设</div>
+                <div class="curve-presets">
+                    <button class="preset-btn" data-preset="piano">钢琴</button>
+                    <button class="preset-btn" data-preset="pluck">拨弦</button>
+                    <button class="preset-btn" data-preset="pad">合成垫</button>
+                    <button class="preset-btn" data-preset="organ">风琴</button>
+                    <button class="preset-btn" data-preset="bell">钟声</button>
+                    <button class="preset-btn" data-preset="bass">贝斯</button>
+                </div>
+                <div class="adsr-display">
+                    <div class="adsr-row"><span>A</span><span id="disp-attack">50</span>ms</div>
+                    <div class="adsr-row"><span>D</span><span id="disp-decay">100</span>ms</div>
+                    <div class="adsr-row"><span>S</span><span id="disp-sustain">70</span>%</div>
+                    <div class="adsr-row"><span>R</span><span id="disp-release">200</span>ms</div>
+                </div>
+                <button class="apply-btn" id="btn-apply-bezier">✓ 应用到选中轨道</button>
+            </div>
+            <!-- Right: bezier canvas -->
+            <div class="bezier-canvas-area">
+                <div class="bezier-canvas-title" id="bezier-canvas-title">音色频谱曲线</div>
+                <canvas id="bezier-canvas" width="600" height="360"></canvas>
+                <div class="bezier-instructions">
+                    拖动控制点改变曲线 · 双击空白处添加节点 · 右键节点删除
+                </div>
+                <div class="bezier-actions">
+                    <button class="action-btn" id="btn-curve-reset">↺ 重置</button>
+                    <button class="action-btn" id="btn-curve-smooth">〜 平滑</button>
+                    <button class="action-btn" id="btn-curve-linear">/ 线性</button>
+                </div>
+            </div>
+        </div>
+        <!-- Preview section -->
+        <div class="bezier-preview">
+            <span class="preview-label">ADSR 预览 (合并视图)</span>
+            <canvas id="adsr-preview-canvas" width="600" height="100"></canvas>
+            <button class="preview-play-btn" id="btn-preview-sound">▶ 试音</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== MIXER MODAL ===== -->
+<div class="modal-overlay" id="mixer-modal" style="display:none;">
+    <div class="modal-box mixer-modal-box">
+        <div class="modal-header">
+            <h2>🎛 混音器</h2>
+            <button class="modal-close" id="mixer-modal-close">✕</button>
+        </div>
+        <div class="mixer-body" id="mixer-body">
+            <!-- channels injected by JS -->
+        </div>
+    </div>
+</div>
+
+<!-- ===== SCALE KEYBOARD PANEL ===== -->
+<div class="scale-keyboard-panel" id="scale-keyboard-panel" style="display:none;">
+    <div class="scale-kb-header">
+        <span class="scale-kb-title">🎹 调式钢琴键盘</span>
+        <span class="scale-kb-hint-top">上半行: QWERTY</span>
+        <span class="scale-kb-hint-bot">下半行: ASDFGH</span>
+        <div class="scale-kb-controls">
+            <!-- 调式选择按钮 -->
+            <label class="kb-ctrl-label">调式</label>
+            <button class="kb-scale-btn" id="kb-scale-btn" title="点击选择调式">
+                <span id="kb-scale-icon">☀️</span>
+                <span id="kb-scale-name">大调 Major</span>
+                <span class="kb-scale-arrow">▾</span>
+            </button>
+
+            <!-- 根音 -->
+            <label class="kb-ctrl-label">根音</label>
+            <select id="kb-root-select" class="kb-select"></select>
+
+            <!-- 八度 -->
+            <label class="kb-ctrl-label">八度</label>
+            <button class="kb-octave-btn" id="kb-octave-down">－</button>
+            <span class="kb-octave-display" id="kb-octave-display">4</span>
+            <button class="kb-octave-btn" id="kb-octave-up">＋</button>
+
+            <!-- 自定义音程 -->
+            <div class="kb-custom-area" id="kb-custom-area" style="display:none;">
+                <label class="kb-ctrl-label">自定义音程</label>
+                <input type="text" class="kb-custom-input" id="kb-custom-input"
+                       placeholder="0,2,4,5,7,9,11" value="0,2,4,5,7,9,11">
+            </div>
+
+            <!-- 转换为该调式 -->
+            <button class="kb-convert-btn" id="btn-convert-to-scale" title="将选中音轨的音符量化到当前调式">🎯 转为该调式</button>
+
+            <!-- 音律设置按钮 -->
+            <label class="kb-ctrl-label">音律</label>
+            <button class="kb-tuning-btn" id="kb-tuning-btn" title="设置非十二平均律音律">
+                <span id="kb-tuning-name">十二平均律</span>
+                <span class="kb-tuning-arrow">▾</span>
+            </button>
+
+            <!-- 录制提示 -->
+            <span class="kb-record-hint" id="kb-record-hint">⏺ 录制模式下触键写入音符</span>
+        </div>
+        <button class="kb-close-btn" id="btn-close-scale-kb">✕</button>
+    </div>
+    <!-- 调式选择面板（弹出式） -->
+    <div class="scale-picker-panel" id="kb-scale-picker">
+        <div class="scale-pick-cats"></div>
+        <div class="scale-pick-body">
+            <div class="scale-pick-list" id="kb-scale-list"></div>
+            <div class="scale-pick-info" id="kb-scale-info"></div>
+        </div>
+    </div>
+
+    <!-- 音律设置面板（弹出式） -->
+    <div class="tuning-picker-panel" id="kb-tuning-picker" style="display:none;">
+        <div class="tuning-pick-header">🎵 自定义音律（非十二平均律）</div>
+        <div class="tuning-pick-presets">
+            <label>预设音律：</label>
+            <select id="kb-tuning-preset-select">
+                <option value="12tet">十二平均律 (Western Standard)</option>
+                <option value="arabic_24">阿拉伯 24 平均律 (Quarter Tones)</option>
+                <option value="indian_22">印度 22 Shruti (近似)</option>
+                <option value="chinese_pure">中国古琴纯律 (Just Intonation)</option>
+                <option value="indonesian_s">印尼 Slendro 五声</option>
+                <option value="custom">自定义...</option>
+            </select>
+        </div>
+        <div class="tuning-custom-editor" id="kb-tuning-editor">
+            <label>音分偏差 (cents)：</label>
+
+            <!-- 圆形音律编辑器：圆周 = 一个八度 = 1200 cents -->
+            <div class="tuning-circle-area">
+                <div class="tuning-circle-header">
+                    🎯 <b>圆形音律编辑器</b>　圆周 = 1200 cents (一个八度)　·　拖动点位决定每个音的音分偏差
+                </div>
+                <div class="tuning-circle-svg-wrap">
+                    <svg id="kb-tuning-circle-svg" width="320" height="320" viewBox="-160 -160 320 320">
+                        <!-- 外圆参考线 -->
+                        <circle cx="0" cy="0" r="140" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="1"/>
+                        <!-- 中心 -->
+                        <circle cx="0" cy="0" r="3" fill="rgba(255,255,255,0.4)"/>
+                        <!-- 中心十字 -->
+                        <line x1="-145" y1="0" x2="145" y2="0" stroke="rgba(255,255,255,0.10)" stroke-width="1"/>
+                        <line x1="0" y1="-145" x2="0" y2="145" stroke="rgba(255,255,255,0.10)" stroke-width="1"/>
+                        <!-- 0度参考线（上方） -->
+                        <line x1="0" y1="-140" x2="0" y2="-110" stroke="rgba(255,64,129,0.7)" stroke-width="2"/>
+                        <text x="0" y="-115" text-anchor="middle" font-size="10" fill="rgba(255,64,129,0.9)">0¢</text>
+                        <!-- 12个音名点（JS 动态生成） -->
+                        <g id="kb-tuning-circle-points"></g>
+                        <!-- n等分刻度线（JS 动态生成） -->
+                        <g id="kb-tuning-circle-ticks"></g>
+                    </svg>
+                </div>
+                <div class="tuning-circle-info" id="kb-tuning-circle-info">
+                    拖动圆上的点来调整音分偏差　·　当前: <span id="tuning-circle-current">未选中</span>
+                </div>
+            </div>
+
+            <!-- n 等分输入 -->
+            <div class="tuning-n-section">
+                <label>🎼 n 等分（实现 n 平均律）：</label>
+                <input type="number" id="kb-tuning-n-input" min="2" max="72" value="12" step="1">
+                <span>份</span>
+                <button id="kb-tuning-n-apply" class="kb-tuning-n-btn">应用 n 等分</button>
+                <span class="tuning-n-hint">输入 12=十二平均律, 19=十九平均律, 24=二十四平均律…</span>
+            </div>
+
+            <!-- 原滑块 grid（保留作辅助参考） -->
+            <details class="tuning-cents-details">
+                <summary>🎚 滑块编辑器（辅助参考）</summary>
+                <div class="tuning-cents-grid" id="kb-tuning-cents-grid"></div>
+            </details>
+
+            <div class="tuning-pick-actions">
+                <button id="kb-tuning-test">🔊 测试播放</button>
+                <button id="kb-tuning-apply">✅ 应用音律</button>
+                <button id="kb-tuning-save">💾 保存到调式列表</button>
+                <button id="kb-tuning-reset">↺ 重置为十二平均律</button>
+            </div>
+        </div>
+    </div>
+    <!-- 键盘画布 -->
+    <div class="scale-kb-canvas-wrap">
+        <canvas id="scale-kb-canvas" data-height="130"></canvas>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="js/audio-engine.js?v=20260725"></script>
+<script src="js/bezier-editor.js"></script>
+<script src="js/piano-roll.js"></script>
+<script src="js/tracks.js?v=20260725"></script>
+<script src="js/mixer.js"></script>
+<script src="js/scale-keyboard.js?v=20260725"></script>
+<script src="js/audio-export.js?v=20260725"></script>
+<script src="js/spectrogram-designer.js?v=20260725"></script>
+<script src="js/wave-designer.js?v=20260725"></script>
+<script src="js/sample-importer.js?v=20260725"></script>
+<script src="js/sample-library.js"></script>
+<script src="js/sample-library-ui.js"></script>
+<script src="js/app.js?v=20260725"></script>
+<script src="js/project-manager.js"></script>
+<script>
+// 动态更新 --header-h 为 toolbar 实际高度（支持工具栏换行）
+(function() {
+    const toolbar = document.getElementById('toolbar');
+    if (!toolbar) return;
+    function updateHeaderHeight() {
+        const h = toolbar.getBoundingClientRect().height;
+        document.documentElement.style.setProperty('--header-h', h + 'px');
+    }
+    updateHeaderHeight();
+    new ResizeObserver(updateHeaderHeight).observe(toolbar);
+    window.addEventListener('resize', updateHeaderHeight);
+})();
+</script>
+
+<script>document.addEventListener("DOMContentLoaded",function(){var d=document.createElement("div");d.id="_wb_version";d.style.cssText="position:fixed;bottom:5px;right:5px;background:#e74c3c;color:white;padding:3px 8px;font-size:11px;z-index:99999;border-radius:3px;font-family:monospace";d.textContent="v1782623701646";document.body.appendChild(d)});</script></body>
+</html>
