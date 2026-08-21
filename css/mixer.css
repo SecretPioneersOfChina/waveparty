@@ -1,0 +1,197 @@
+/* ===== Mixer Styles ===== */
+.mixer-modal-box {
+    width: min(800px, 96vw);
+    max-height: 70vh;
+}
+
+.mixer-body {
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 16px;
+    gap: 8px;
+    min-height: 300px;
+    align-items: flex-end;
+}
+
+.mixer-channel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    min-width: 68px;
+    background: var(--bg-light);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 8px 8px;
+}
+
+.mixer-channel.master-channel {
+    border-color: var(--accent);
+    background: rgba(124,77,255,0.1);
+}
+
+.mixer-ch-name {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-align: center;
+    max-width: 60px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.mixer-ch-color {
+    width: 24px;
+    height: 4px;
+    border-radius: 2px;
+}
+
+.mixer-fader-track {
+    width: 6px;
+    height: 120px;
+    background: var(--bg-dark);
+    border-radius: 3px;
+    position: relative;
+    cursor: pointer;
+}
+
+.mixer-fader-fill {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: var(--accent);
+    border-radius: 3px;
+    transition: height 0.05s;
+}
+
+.mixer-fader-thumb {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px; height: 8px;
+    background: var(--text-primary);
+    border-radius: 3px;
+    cursor: ns-resize;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+    transition: background 0.1s;
+}
+.mixer-fader-thumb:hover { background: var(--accent); }
+
+.mixer-pan-knob {
+    width: 36px;
+    height: 36px;
+    background: var(--bg-dark);
+    border: 2px solid var(--border-light);
+    border-radius: 50%;
+    position: relative;
+    cursor: pointer;
+    touch-action: none;
+}
+.mixer-pan-knob::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 10px;
+    background: var(--accent);
+    border-radius: 1px;
+}
+
+.mixer-ch-vol-display {
+    font-size: 10px;
+    color: var(--text-muted);
+}
+
+.mixer-mute-btn, .mixer-solo-btn {
+    background: var(--bg-dark);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text-muted);
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 5px;
+    cursor: pointer;
+    transition: background 0.1s;
+    width: 28px;
+    text-align: center;
+}
+.mixer-mute-btn.active { background: #ff4081; color: #fff; border-color: #ff4081; }
+.mixer-solo-btn.active { background: #ffb300; color: #000; border-color: #ffb300; }
+
+.mixer-ch-buttons {
+    display: flex;
+    gap: 3px;
+}
+
+/* VU meter */
+.mixer-vu {
+    display: flex;
+    gap: 2px;
+    height: 120px;
+    align-items: flex-end;
+}
+.mixer-vu-bar {
+    width: 4px;
+    background: var(--bg-dark);
+    border-radius: 2px;
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+}
+/* ===== iPad / Tablet Optimizations ===== */
+@media (min-width: 768px) and (max-width: 1366px) {
+    .mixer-modal-box {
+        width: min(860px, 94vw);
+        max-height: 80vh;
+    }
+    .mixer-body {
+        gap: 10px;
+        padding: 20px 16px;
+        min-height: 340px;
+    }
+    .mixer-channel {
+        min-width: 76px;
+        padding: 12px 10px 10px;
+        gap: 8px;
+    }
+    .mixer-ch-name {
+        font-size: 11px;
+        max-width: 68px;
+    }
+    .mixer-fader-track {
+        width: 8px;
+        height: 140px;
+    }
+    .mixer-fader-thumb {
+        width: 24px;
+        height: 10px;
+    }
+    .mixer-pan-knob {
+        width: 42px;
+        height: 42px;
+    }
+    .mixer-vu {
+        height: 140px;
+    }
+    .mixer-vu-bar {
+        width: 5px;
+    }
+    .mixer-mute-btn, .mixer-solo-btn {
+        width: 32px;
+        font-size: 10px;
+        padding: 3px 6px;
+    }
+    .mixer-ch-vol-display {
+        font-size: 11px;
+    }
+}
+
+@media (min-width: 1024px) and (max-width: 1366px) {
+    .mixer-channel {
+        min-width: 84px;
+    }
+}

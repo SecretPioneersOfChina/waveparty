@@ -1,0 +1,342 @@
+/* ===== Piano Roll Styles ===== */
+.piano-roll-panel {
+    flex-shrink: 0;
+    height: 45vh;
+    min-height: 200px;
+    background: var(--bg-dark);
+    border-top: 2px solid var(--accent);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.piano-roll-header {
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+    min-height: 40px;
+    height: auto;
+}
+
+.pr-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-right: 4px;
+}
+
+.pr-close-btn {
+    background: var(--bg-light);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text-secondary);
+    padding: 3px 8px;
+    font-size: 11px;
+    cursor: pointer;
+    margin-right: 8px;
+}
+.pr-close-btn:hover { background: var(--accent3); color: #fff; border-color: var(--accent3); }
+
+.pr-tools {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.pr-tool-btn {
+    background: var(--bg-light);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text-secondary);
+    padding: 4px 8px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.1s;
+}
+.pr-tool-btn:hover { background: var(--border-light); }
+.pr-tool-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.pr-tool-btn.delete-btn { color: #ff6b6b; }
+.pr-tool-btn.delete-btn:hover { background: rgba(255,107,107,0.18); color: #ff6b6b; }
+
+/* 重复 / 清空按钮强调色 */
+.pr-tool-btn#btn-repeat-notes { color: #69f0ae; }
+.pr-tool-btn#btn-repeat-notes:hover { background: rgba(105,240,174,0.18); color: #69f0ae; }
+.pr-tool-btn#btn-clear-all { color: #ff5252; }
+.pr-tool-btn#btn-clear-all:hover { background: rgba(255,82,82,0.22); color: #ff5252; }
+
+/* 工具栏里的分组分隔 */
+.pr-scroll-btn {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid var(--border-light);
+    border-radius: 4px;
+    color: var(--text-secondary);
+    padding: 4px 8px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.1s;
+    flex-shrink: 0;
+}
+.pr-scroll-btn:hover { background: rgba(124,77,255,0.25); color: #fff; border-color: var(--accent); }
+.pr-scroll-btn:active { background: var(--accent); color: #fff; }
+
+@media (max-width: 768px) {
+    .pr-scroll-btn {
+        padding: 2px 6px;
+        font-size: 11px;
+    }
+}
+
+.pr-zoom-label { font-size: 11px; color: var(--text-muted); margin-left: 6px; }
+.pr-fit-btn {
+    background: rgba(124,77,255,0.15);
+    border: 1px solid rgba(124,77,255,0.35);
+    border-radius: 4px;
+    color: #b388ff;
+    padding: 3px 10px;
+    font-size: 11px;
+    cursor: pointer;
+    margin-left: 6px;
+    transition: all 0.15s;
+}
+.pr-fit-btn:hover { background: rgba(124,77,255,0.28); border-color: rgba(124,77,255,0.55); color: #d1c4ff; }
+.pr-zoom-slider {
+    -webkit-appearance: none;
+    width: 70px; height: 3px;
+    background: var(--border-light);
+    border-radius: 2px;
+    outline: none;
+}
+.pr-zoom-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+}
+
+.pr-quantize-group {
+    font-size: 11px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+@media (max-width: 900px) {
+    .pr-quantize-group {
+        margin-left: 0;
+        width: 100%;
+        order: 100;
+        padding-top: 4px;
+    }
+}
+#pr-quantize {
+    background: var(--bg-light);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text-primary);
+    font-size: 11px;
+    padding: 2px 4px;
+    outline: none;
+}
+
+.piano-roll-body {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+}
+
+.piano-keys-canvas {
+    flex-shrink: 0;
+    background: #111;
+    cursor: pointer;
+}
+
+.pr-scroll-area {
+    flex: 1;
+    overflow: auto;
+    position: relative;
+}
+
+.pr-grid-canvas {
+    display: block;
+    cursor: crosshair;
+    user-select: none;
+    -webkit-user-select: none;
+    /* 不允许 touch-action: pan-y，否则会阻止水平触摸滚动 */
+    touch-action: auto;
+}
+
+/* 浮动左右滚动按钮 */
+.pr-float-scroll-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    width: 32px;
+    height: 64px;
+    background: rgba(30,33,40,0.85);
+    border: 1px solid var(--border-light);
+    border-radius: 6px;
+    color: var(--text-secondary);
+    font-size: 18px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s, background 0.15s;
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.pr-float-left { left: 68px; }  /* KEY_W(60) + 8px gap */
+.pr-float-right { right: 8px; }
+
+.piano-roll-body:hover .pr-float-scroll-btn,
+.pr-float-scroll-btn:active,
+.pr-float-scroll-btn:focus {
+    opacity: 1;
+}
+.pr-float-scroll-btn:hover {
+    background: rgba(124,77,255,0.5);
+    color: #fff;
+    border-color: var(--accent);
+}
+.pr-float-scroll-btn:active {
+    background: var(--accent);
+    color: #fff;
+}
+
+/* 小屏幕上始终显示浮动按钮 */
+@media (max-width: 768px) {
+    .pr-float-scroll-btn {
+        opacity: 0.7;
+        width: 36px;
+        height: 72px;
+    }
+}
+
+/* ===== iPad / Tablet Optimizations ===== */
+@media (min-width: 768px) and (max-width: 1366px) {
+    .piano-roll-panel {
+        height: 50vh;
+        min-height: 240px;
+    }
+    .piano-roll-header {
+        padding: 8px 14px;
+        gap: 8px;
+    }
+    .pr-title {
+        font-size: 14px;
+    }
+    .pr-close-btn {
+        padding: 5px 10px;
+        font-size: 12px;
+    }
+    .pr-tool-btn {
+        padding: 6px 10px;
+        font-size: 13px;
+        min-width: 32px;
+        min-height: 32px;
+    }
+    .pr-zoom-slider {
+        width: 90px;
+        height: 4px;
+    }
+    .pr-zoom-slider::-webkit-slider-thumb {
+        width: 16px;
+        height: 16px;
+    }
+    .pr-fit-btn {
+        padding: 5px 12px;
+        font-size: 12px;
+    }
+    .pr-quantize-group {
+        font-size: 12px;
+        gap: 6px;
+    }
+    #pr-quantize {
+        font-size: 12px;
+        padding: 3px 6px;
+    }
+    .piano-keys-canvas {
+        width: 72px !important;
+    }
+}
+
+@media (min-width: 1024px) and (max-width: 1366px) {
+    .piano-roll-panel {
+        height: 48vh;
+    }
+    .piano-keys-canvas {
+        width: 80px !important;
+    }
+}
+
+/* ===== Small Screen Optimizations ===== */
+@media (max-width: 768px) {
+    .piano-roll-header {
+        padding: 4px 8px;
+        gap: 4px;
+    }
+    .pr-title {
+        font-size: 12px;
+        margin-right: 2px;
+    }
+    .pr-close-btn {
+        padding: 2px 6px;
+        font-size: 10px;
+        margin-right: 4px;
+    }
+    .pr-tools {
+        gap: 2px;
+    }
+    .pr-tool-btn {
+        padding: 3px 6px;
+        font-size: 11px;
+    }
+    .pr-pitch-label,
+    .pr-duration-label,
+    .pr-zoom-label {
+        font-size: 10px;
+    }
+    .pr-pitch-btn {
+        padding: 2px 5px;
+        font-size: 10px;
+    }
+    .pr-duration-btn {
+        padding: 1px 4px;
+        font-size: 10px;
+    }
+    .pr-fit-btn {
+        padding: 2px 6px;
+        font-size: 10px;
+    }
+    .pr-zoom-slider {
+        width: 50px;
+    }
+    .pr-quantize-group {
+        font-size: 10px;
+    }
+}
+
+/* 框选工具按钮（平板专用） */
+.pr-tool-btn#btn-range-select {
+    color: #ffc107;
+}
+.pr-tool-btn#btn-range-select:hover {
+    background: rgba(255,193,7,0.18);
+    color: #ffc107;
+}
+.pr-tool-btn#btn-range-select.active {
+    background: #ffc107;
+    color: #111;
+    border-color: #ffc107;
+}

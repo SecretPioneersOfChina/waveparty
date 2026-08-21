@@ -1,0 +1,387 @@
+/* ===== Tuning Panel (Non-12TET support) ===== */
+.tuning-picker-panel {
+    position: absolute;
+    top: 50px;
+    left: 10px;
+    background: #1a1d27;
+    border: 1px solid #373b47;
+    border-radius: 12px;
+    padding: 16px;
+    z-index: 1000;
+    min-width: 420px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+
+.tuning-pick-header {
+    font-size: 15px;
+    font-weight: 700;
+    color: #e0e0e0;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #2a2d38;
+}
+
+.tuning-pick-presets {
+    margin-bottom: 12px;
+}
+
+.tuning-pick-presets label {
+    display: block;
+    font-size: 12px;
+    color: #8890a8;
+    margin-bottom: 6px;
+}
+
+.tuning-pick-presets select {
+    width: 100%;
+    padding: 8px;
+    background: #23262f;
+    border: 1px solid #373b47;
+    border-radius: 6px;
+    color: #e0e0e0;
+    font-size: 13px;
+}
+
+.tuning-custom-editor {
+    margin-top: 12px;
+}
+
+.tuning-custom-editor > label {
+    display: block;
+    font-size: 12px;
+    color: #8890a8;
+    margin-bottom: 8px;
+}
+
+.tuning-cents-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.tuning-cent-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.tuning-cent-label {
+    font-size: 11px;
+    color: #8890a8;
+    font-weight: 600;
+}
+
+.tuning-cent-slider {
+    width: 80px;
+    height: 6px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: #2a2d38;
+    border-radius: 3px;
+    outline: none;
+    cursor: pointer;
+}
+
+.tuning-cent-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #7c4dff;
+    cursor: pointer;
+    border: 2px solid #1a1d27;
+    transition: background 0.15s;
+}
+
+.tuning-cent-slider::-webkit-slider-thumb:hover {
+    background: #aa80ff;
+}
+
+.tuning-cent-slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #7c4dff;
+    cursor: pointer;
+    border: 2px solid #1a1d27;
+}
+
+.tuning-cent-value {
+    font-size: 10px;
+    color: #5f6678;
+    min-width: 30px;
+    text-align: center;
+}
+
+.tuning-pick-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.tuning-pick-actions button {
+    flex: 1;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+#kb-tuning-test {
+    background: #7c4dff;
+    color: #fff;
+}
+
+#kb-tuning-test:hover {
+    background: #aa80ff;
+}
+
+#kb-tuning-apply {
+    background: #7c4dff;
+    color: #fff;
+}
+
+#kb-tuning-apply:hover {
+    background: #aa80ff;
+}
+
+#kb-tuning-reset {
+    background: #363b47;
+    color: #aab0c0;
+}
+
+#kb-tuning-reset:hover {
+    background: #434952;
+}
+
+/* Scale keyboard tuning button */
+.kb-tuning-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: #23262f;
+    border: 1px solid #373b47;
+    border-radius: 6px;
+    color: #e0e0e0;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.kb-tuning-btn:hover {
+    background: #2a2d38;
+    border-color: #7c4dff;
+}
+
+.kb-tuning-btn.open {
+    background: #2a1d3d;
+    border-color: #7c4dff;
+}
+
+.kb-tuning-arrow {
+    font-size: 10px;
+    transition: transform 0.2s;
+}
+
+/* ===== iPad / Tablet Optimizations ===== */
+@media (min-width: 768px) and (max-width: 1366px) {
+    .tuning-picker-panel {
+        min-width: 500px;
+        padding: 18px;
+        top: 54px;
+    }
+    .tuning-cents-grid {
+        grid-template-columns: repeat(6, 1fr);
+        gap: 12px;
+    }
+    .tuning-cent-item {
+        gap: 6px;
+    }
+    .tuning-cent-label {
+        font-size: 12px;
+    }
+    .tuning-cent-slider {
+        width: 90px;
+        height: 6px;
+    }
+    .tuning-cent-slider::-webkit-slider-thumb {
+        width: 20px;
+        height: 20px;
+    }
+    .tuning-cent-value {
+        font-size: 11px;
+        min-width: 36px;
+    }
+    .tuning-pick-actions button {
+        padding: 10px 16px;
+        font-size: 14px;
+    }
+    .kb-tuning-btn {
+        padding: 8px 14px;
+        font-size: 14px;
+    }
+    #kb-tuning-name {
+        font-size: 14px;
+    }
+}
+
+@media (min-width: 1024px) and (max-width: 1366px) {
+    .tuning-picker-panel {
+        min-width: 560px;
+    }
+    .tuning-cents-grid {
+        grid-template-columns: repeat(6, 1fr);
+    }
+}
+
+/* ===== 圆形音律编辑器 ===== */
+.tuning-circle-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 16px 0;
+    padding: 14px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(124,77,255,0.25);
+    border-radius: 10px;
+}
+.tuning-circle-header {
+    font-size: 12px;
+    color: rgba(255,255,255,0.65);
+    margin-bottom: 10px;
+    text-align: center;
+}
+.tuning-circle-header b {
+    color: #fff;
+}
+.tuning-circle-svg-wrap {
+    background: radial-gradient(circle, rgba(40,30,70,0.6) 0%, rgba(20,20,30,0.6) 100%);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 50%;
+    padding: 4px;
+    cursor: crosshair;
+    user-select: none;
+    -webkit-user-select: none;
+}
+#kb-tuning-circle-svg {
+    display: block;
+    overflow: visible;
+}
+.tuning-circle-point {
+    cursor: grab;
+    transition: r 0.12s ease;
+}
+.tuning-circle-point:hover {
+    r: 10;
+}
+.tuning-circle-point.dragging {
+    cursor: grabbing;
+    r: 11;
+}
+.tuning-circle-point.highlight {
+    filter: drop-shadow(0 0 6px #ff4081);
+}
+.tuning-circle-point-label {
+    font-size: 11px;
+    font-weight: bold;
+    fill: #fff;
+    pointer-events: none;
+    user-select: none;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+}
+.tuning-circle-info {
+    margin-top: 12px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.7);
+    height: 18px;
+}
+#tuning-circle-current {
+    color: #ff4081;
+    font-weight: bold;
+}
+.tuning-circle-tick {
+    stroke: rgba(255,255,255,0.12);
+    stroke-width: 1;
+}
+.tuning-circle-tick.major {
+    stroke: rgba(255,193,7,0.4);
+}
+
+/* n 等分输入区 */
+.tuning-n-section {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 12px 0;
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(76,175,80,0.25);
+    border-radius: 8px;
+}
+.tuning-n-section label {
+    color: rgba(255,255,255,0.85);
+    font-size: 13px;
+    font-weight: 500;
+}
+#kb-tuning-n-input {
+    width: 70px;
+    padding: 5px 8px;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 6px;
+    color: #fff;
+    font-size: 13px;
+    font-weight: bold;
+    text-align: center;
+}
+#kb-tuning-n-input:focus {
+    outline: none;
+    border-color: rgba(124,77,255,0.6);
+}
+.kb-tuning-n-btn {
+    padding: 5px 14px;
+    background: linear-gradient(135deg, #4caf50, #66bb6a);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: transform 0.1s;
+}
+.kb-tuning-n-btn:hover {
+    background: linear-gradient(135deg, #66bb6a, #81c784);
+}
+.kb-tuning-n-btn:active {
+    transform: scale(0.95);
+}
+.tuning-n-hint {
+    color: rgba(255,255,255,0.4);
+    font-size: 11px;
+    margin-left: auto;
+}
+.tuning-cents-details {
+    margin: 8px 0;
+    color: rgba(255,255,255,0.7);
+    font-size: 12px;
+}
+.tuning-cents-details summary {
+    cursor: pointer;
+    padding: 6px 10px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 6px;
+    user-select: none;
+}
+.tuning-cents-details summary:hover {
+    background: rgba(255,255,255,0.07);
+}
+.tuning-cents-details[open] summary {
+    margin-bottom: 8px;
+}
